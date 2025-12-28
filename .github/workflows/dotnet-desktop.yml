@@ -1,0 +1,29 @@
+name: Build
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: SteamDebloat
+      - name: Build
+        run: dotnet build --configuration Release
+        working-directory: SteamDebloat
+      - name: Publish
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o publish
+        working-directory: SteamDebloat
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-App
+          path: SteamDebloat/publish/
